@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: besu_challenge_postgres
+    command: ["postgres", "-p", "5433"]
+    environment:
+      POSTGRES_USER: db_besu_user
+      POSTGRES_DB: db_besu  
+      POSTGRES_PASSWORD: db_besu_password 
+    ports:
+      - "5433:5433"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
