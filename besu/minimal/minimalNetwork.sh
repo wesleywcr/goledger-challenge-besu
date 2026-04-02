@@ -4,8 +4,21 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../colors.sh"
 
 BESU=./bin/besu
 
-mkdir tmp && cd tmp
-../$BESU operator generate-blockchain-config --config-file=../minimal/config.json --to=network --private-key-file-name=key
+# Clean previous generated files, including root-owned leftovers.
+docker run --rm --entrypoint /bin/sh \
+    -v "$(pwd):/work" \
+    hyperledger/besu:25.4.1 \
+    -c "rm -rf /work/tmp"
+mkdir -p tmp
+cd tmp || exit 1
+docker run --rm \
+    --user "$(id -u):$(id -g)" \
+    -v "$(pwd)/..:/work" \
+    hyperledger/besu:25.4.1 \
+    operator generate-blockchain-config \
+    --config-file=/work/minimal/config.json \
+    --to=/work/tmp/network \
+    --private-key-file-name=key
 
 cd ..
 
@@ -22,7 +35,7 @@ cp tmp/network/genesis.json genesis/genesis.json
 if [ "$OS" = "Darwin" ]; then
     rm -rf tmp
 else
-    sudo rm -rf tmp
+    rm -rf tmp
 fi
 echo
 
@@ -61,11 +74,11 @@ done
 echo -e "\n${GREEN}besu.node-1 is responsive!${NC}\n"
 
 ENODE_RESPONSE=$(curl -s -X POST --data '{"jsonrpc":"2.0","method":"net_enode","params":[],"id":1}' -H "Content-Type: application/json" http://localhost:8545/)
-ENODE_URL=$(echo $ENODE_RESPONSE | jq -r '.result')
-echo $ENODE_URL > minimal/bootnodes.txt
+ENODE_URL=$(echo "$ENODE_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin)['result'])")
+echo "$ENODE_URL" > minimal/bootnodes.txt
 
-HOST_IP=$(docker container inspect besu.node-1 | jq -r '.[0].NetworkSettings.Networks.besu_test_network.IPAddress')
-sed -i.bak "s/127.0.0.1/$HOST_IP/g" minimal/bootnodes.txt
+HOST_IP=$(docker container inspect besu.node-1 | python3 -c "import sys, json; print(json.load(sys.stdin)[0]['NetworkSettings']['Networks']['besu_test_network']['IPAddress'])")
+sed -i.bak -e "s/127.0.0.1/$HOST_IP/g" -e "s/0.0.0.0/$HOST_IP/g" minimal/bootnodes.txt
 
 echo -e "${BLUE}Starting besu.node-2 on docker...${NC}"
 docker run -d \

@@ -16,13 +16,13 @@ if [ "$OS" = "Darwin" ]; then
     rm -f .env.network
     rm -f minimal/bootnodes.*
 else
-    sudo rm -rf tmpFiles/
-    sudo rm -rf networkFiles/
-    sudo rm -rf genesis/
-    sudo rm -rf nodes/
-    sudo rm -rf config/qbftConfigFile.json
-    sudo rm -f .env.network
-    sudo rm -f minimal/bootnodes.*
+     rm -rf tmpFiles/
+     rm -rf networkFiles/
+     rm -rf genesis/
+     rm -rf nodes/
+     rm -rf config/qbftConfigFile.json
+     rm -f .env.network
+     rm -f minimal/bootnodes.*
 fi
 
 echo -e "${YELLOW}Removing all previous besu node containers...${NC}"
