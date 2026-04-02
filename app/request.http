@@ -1,0 +1,29 @@
+# Install extension: REST Client
+# https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+###
+@BASE_URL=http://localhost:8080
+###
+
+###
+POST {{BASE_URL}}/value/set
+Content-Type: application/json
+
+{
+  "value": 10
+}
+###
+
+###
+GET {{BASE_URL}}/value/get
+Content-Type: application/json
+###
+
+###
+POST {{BASE_URL}}/value/sync
+Content-Type: application/json
+###
+
+GET {{BASE_URL}}/value/check
+Content-Type: application/json
+###
